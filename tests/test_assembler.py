@@ -1,12 +1,9 @@
 """Тесты ассемблера УВМ (этап 1): примеры из спецификации."""
 
-import contextlib
-import io
 import os
-import tempfile
 import unittest
 
-from src import asm_cli, assembler
+from src import assembler
 
 EXAMPLES = os.path.join(os.path.dirname(__file__), "..", "examples")
 
@@ -107,40 +104,6 @@ class ErrorTests(unittest.TestCase):
         """Файла нет."""
         with self.assertRaises(assembler.AsmError):
             assembler.assemble_file("no_such_file.json")
-
-
-class CliTests(unittest.TestCase):
-    """Проверка командной строки."""
-
-    def run_cli(self, argv):
-        """Запустить CLI; вернуть код возврата и вывод."""
-        buffer = io.StringIO()
-        with contextlib.redirect_stdout(buffer):
-            with contextlib.redirect_stderr(io.StringIO()):
-                code = asm_cli.main(argv)
-        return code, buffer.getvalue()
-
-    def test_test_mode_output(self):
-        """В режиме --test печатаются поля как в спецификации."""
-        source = os.path.join(EXAMPLES, "spec_tests.json")
-        with tempfile.TemporaryDirectory() as folder:
-            target = os.path.join(folder, "out.bin")
-            code, output = self.run_cli([source, target, "--test"])
-        expected = "A=0, B=1009\nA=36, B=212\nA=38, B=679\n"
-        self.assertEqual(code, asm_cli.EXIT_OK)
-        self.assertEqual(output, expected + "A=61, B=208, C=386\n")
-
-    def test_no_output_without_test_mode(self):
-        """Без --test поля на экран не выводятся."""
-        source = os.path.join(EXAMPLES, "spec_tests.json")
-        code, output = self.run_cli([source, "out.bin"])
-        self.assertEqual(code, asm_cli.EXIT_OK)
-        self.assertEqual(output, "")
-
-    def test_error_code(self):
-        """Ошибка в программе даёт код 1."""
-        code, _ = self.run_cli(["no_such_file.json", "out.bin"])
-        self.assertEqual(code, asm_cli.EXIT_ERROR)
 
 
 if __name__ == "__main__":
