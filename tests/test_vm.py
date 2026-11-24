@@ -78,3 +78,41 @@ class ArrayCopyTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ShrTest(unittest.TestCase):
+    """Тесты команды логического сдвига вправо (этап 4)."""
+
+    def test_shr_basic(self):
+        """214 >> 2 = 53."""
+        program = assembler.assemble_file(
+            os.path.join(EXAMPLES, "shr_test.json")
+        )
+        binary = b"".join(codec.encode_program(program))
+
+        machine = vm.VirtualMachine()
+        machine.load_program(binary)
+        machine.data[20] = 214
+
+        machine.run()
+
+        self.assertEqual(machine.data[30], 53)
+
+    def test_shr_zero_shift(self):
+        """Сдвиг на 0 бит не меняет значение."""
+        src = [
+            {"op": "load_const", "value": 40},
+            {"op": "load_const", "value": 0},
+            {"op": "shr", "address": 25, "offset": 0},
+        ]
+        import json
+        text = json.dumps(src)
+        program = assembler.assemble(text)
+        binary = b"".join(codec.encode_program(program))
+
+        machine = vm.VirtualMachine()
+        machine.load_program(binary)
+        machine.data[25] = 0b10101010
+        machine.run()
+
+        self.assertEqual(machine.data[40], 0b10101010)
