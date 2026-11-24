@@ -1,48 +1,37 @@
-# Ассемблер и интерпретатор УВМ
+# Ассемблер и интерпретатор УВМ (вариант 5)
 
 ## 1. Общее описание
 
-Учебная виртуальная машина (УВМ): стековая машина с **разделённой** памятью команд и памятью данных.  
-Проект содержит ассемблер (JSON → машинный код) и интерпретатор.
+Учебная виртуальная машина (УВМ) — стековая машина с **разделённой** памятью команд и памятью данных.
 
-Реализованы этапы 1–3:
-- перевод программы из JSON во внутреннее представление и в машинный код;
-- интерпретатор с командами `load_const`, `read`, `write`;
-- дамп памяти данных в формате XML;
-- тестовая программа копирования массива.
+Реализованы все этапы практической работы:
 
-## 2. Язык ассемблера и настройки
+- **Этап 1–2**: ассемблер (JSON → промежуточное представление → машинный код)
+- **Этап 3**: интерпретатор + команды `load_const`, `read`, `write` + дамп XML
+- **Этап 4**: команда `shr` (логический сдвиг вправо)
+- **Этап 5**: поэлементный `shr` над двумя векторами длины 5 + 3 примера
 
-Программа — JSON-список команд. Каждая команда — объект с полем `op` и операндами:
+## 2. Язык ассемблера
 
-| op          | Операнды              | Что делает                                      |
-|-------------|-----------------------|-------------------------------------------------|
-| load_const  | value                 | положить value на стек                          |
-| read        | address               | положить на стек память[address]                |
-| write       | offset                | снять значение и адрес со стека, записать значение по адресу+offset |
-| shr         | address, offset       | логический сдвиг вправо (этап 4)                |
+Программа — JSON-список команд:
 
-Все операнды — целые числа в допустимом диапазоне поля.
+| op          | Операнды        | Описание |
+|-------------|-----------------|----------|
+| load_const  | value           | положить константу на стек |
+| read        | address         | положить на стек `memory[address]` |
+| write       | offset          | снять значение и адрес, записать значение по `address + offset` |
+| shr         | address, offset | `memory[dest + offset] = memory[address] >> shift` |
 
 Пример:
 
 ```json
 [
-  {"op": "load_const", "value": 50},
-  {"op": "read", "address": 10},
-  {"op": "write", "offset": 0}
+  {"op": "load_const", "value": 100},
+  {"op": "read", "address": 200},
+  {"op": "shr", "address": 100, "offset": 0}
 ]
 ./run.sh asm ИСХОДНИК ВЫХОД [--test]
 ./run.sh run БИНАРНИК ДАМП START:END [--init FILE]
-# Ассемблирование
-./run.sh asm examples/spec_tests.json out.bin --test
-
-# Копирование массива (этап 3)
-./run.sh asm examples/copy_array.json examples/copy_array.bin
-./run.sh run examples/copy_array.bin dump.xml 50:54 --init examples/copy_array_init.txt
-
-# Unit-тесты
 python3 -m unittest discover -s tests -t .
-./run.sh asm examples/spec_tests.json out.bin --test
-./run.sh run examples/copy_array.bin dump.xml 50:54 --init examples/copy_array_init.txt
-cat dump.xml
+./run.sh asm examples/stage5_main.json examples/stage5_main.bin
+./run.sh run examples/stage5_main.bin dump.xml 100:105 --init examples/stage5_main_init.txt
