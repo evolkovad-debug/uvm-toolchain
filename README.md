@@ -32,6 +32,3 @@
 ]
 ./run.sh asm ИСХОДНИК ВЫХОД [--test]
 ./run.sh run БИНАРНИК ДАМП START:END [--init FILE]
-python3 -m unittest discover -s tests -t .
-./run.sh asm examples/stage5_main.json examples/stage5_main.bin
-./run.sh run examples/stage5_main.bin dump.xml 100:105 --init examples/stage5_main_init.txt
