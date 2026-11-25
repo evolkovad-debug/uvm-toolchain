@@ -1,5 +1,0 @@
-[
-  {"op": "load_const", "value": 30},
-  {"op": "load_const", "value": 2},
-  {"op": "shr", "address": 20, "offset": 0}
-]
