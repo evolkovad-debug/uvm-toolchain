@@ -28,6 +28,7 @@ class Machine:
             isa.LOAD_CONST.opcode: self.load_const,
             isa.READ.opcode: self.read,
             isa.WRITE.opcode: self.write,
+            isa.SHR.opcode: self.shr,
         }
 
     def pop(self):
@@ -56,6 +57,16 @@ class Machine:
         value = self.pop()
         address = self.check_address(self.pop() + fields["B"])
         self.data[address] = value & WORD_MASK
+
+    def shr(self, fields):
+        """Сдвиг вправо: ячейка B сдвигается на число, снятое со стека.
+
+        Результат записывается по адресу «снятый со стека адрес + C».
+        """
+        shift = self.pop()
+        address = self.check_address(self.pop() + fields["C"])
+        value = self.data[self.check_address(fields["B"])]
+        self.data[address] = value >> shift
 
     def step(self):
         """Выполнить одну команду: прочитать, декодировать, исполнить."""
